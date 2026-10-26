@@ -1,0 +1,21 @@
+PANDUAN SINGKAT - Undangan Novia & Aulia
+
+ISI PAKET
+  index.html   -> halaman undangan
+  assets/      -> gambar, video cover, dan gambar pratinjau (og-image.jpg)
+
+1) MUSIK
+   Simpan file lagu Anda sebagai  assets/music.mp3  (nama harus persis).
+   Jika file tidak ada, undangan tetap jalan tanpa musik.
+
+2) PRATINJAU DI WHATSAPP
+   Buka index.html, cari "GANTI-DOMAIN-ANDA.com" lalu ganti dengan alamat
+   website Anda yang sebenarnya, mis. https://novia-aulia.netlify.app
+
+3) DEPLOY (pilih salah satu)
+   - Netlify Drop (app.netlify.com/drop): seret seluruh folder ini.
+   - Cloudflare Pages / GitHub Pages / hosting biasa: unggah index.html + folder assets.
+
+4) NAMA TAMU
+   Tambahkan ?to=Nama+Tamu di akhir link, contoh:
+   https://domainanda.com/?to=Bapak+Budi+Santoso
