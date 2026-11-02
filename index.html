@@ -1057,18 +1057,16 @@
         <img class="orn " src="assets/orange-daisy-meadow-patch.webp" alt="" aria-hidden="true"
           style="--w:220px;right:-30px;bottom:-8px">
         <div class="wrap">
-          <h2 class="rv">Ucapan</h2>
-          <p class="sub rv">Sampaikan doa untuk kami.</p>
-          <form class="card rv" id="rsvp-form">
-            <label>Nama<input name="nama" required maxlength="60" autocomplete="name"
-                placeholder="Nama lengkap"></label>
-            <label>Ucapan &amp; doa<textarea name="ucapan" required minlength="2" maxlength="400"
-                placeholder="Ucapan &amp; doa"></textarea></label>
-            <button class="btn" type="submit">Kirim Ucapan</button>
+          <h2 class="rv">Ucapan &amp; Doa</h2>
+          <p class="sub rv">Sampaikan doa restu untuk Novia &amp; Aulia.</p>
+          <form class="card rv" id="rsvp-form" name="ucapan-doa" method="POST" data-netlify="true" netlify>
+            <input type="hidden" name="form-name" value="ucapan-doa">
+            <label>Nama Tamu<input type="text" name="nama" required maxlength="80" autocomplete="name"
+                placeholder="Nama lengkap Anda"></label>
+            <label>Pesan/Doa<textarea name="pesan" required minlength="2" maxlength="500" rows="4"
+                placeholder="Tulis ucapan &amp; doa restu untuk kedua mempelai..."></textarea></label>
+            <button class="btn" type="submit">Kirim Doa</button>
           </form>
-          <div id="wishes" aria-live="polite">
-            <p class="empty">Belum ada ucapan. Jadilah yang pertama.</p>
-          </div>
         </div>
       </section>
 
@@ -1116,12 +1114,17 @@
         let toastTimer;
         const toast = msg => {
           toastEl.textContent = msg; toastEl.classList.add('show');
-          clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+          clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
         };
 
         /* Nama tamu dari URL: ?to=Nama+Tamu */
         const to = new URLSearchParams(location.search).get('to');
-        if (to) $('#guest').textContent = to;
+        if (to) {
+          const guestEl = $('#guest');
+          if (guestEl) guestEl.textContent = to;
+          const namaInput = $('#rsvp-form [name="nama"]');
+          if (namaInput) namaInput.value = to;
+        }
 
         /* Alur: klik "Buka Undangan" -> video diputar -> setelah selesai, nama muncul */
         const finish = () => {
@@ -1187,23 +1190,38 @@
         ['stage', 'mempelai', 'acara', 'rsvp'].forEach(id => spy.observe(document.getElementById(id)));
 
 
-        /* RSVP: ucapan hanya tampil di halaman ini.
-           Untuk menyimpan, kirim data ke backend (Google Sheets / API) di dalam handler ini. */
-        $('#rsvp-form').addEventListener('submit', e => {
-          e.preventDefault();
-          const d = Object.fromEntries(new FormData(e.target));
-          const list = $('#wishes');
-          list.querySelector('.empty')?.remove();
-          const item = document.createElement('article');
-          const name = document.createElement('b'); name.textContent = d.nama;
-          const tag = document.createElement('small'); tag.textContent = d.hadir;
-          const msg = document.createElement('p'); msg.textContent = d.ucapan;
-          item.append(name, tag, msg);
-          list.prepend(item);
-          e.target.reset();
-          count[d.hadir]++; $(ids[d.hadir]).textContent = count[d.hadir];
-          toast('Ucapan terkirim, terima kasih');
-        });
+        /* Kirim Ucapan & Doa ke Netlify Forms via AJAX / Fetch */
+        const rsvpForm = $('#rsvp-form');
+        if (rsvpForm) {
+          rsvpForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const submitBtn = rsvpForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Mengirim...';
+
+            try {
+              const formData = new FormData(rsvpForm);
+              const response = await fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(formData).toString()
+              });
+
+              if (response.ok) {
+                rsvpForm.reset();
+                toast('Terima kasih, doa Anda telah terkirim');
+              } else {
+                toast('Gagal mengirim doa, silakan coba lagi');
+              }
+            } catch (err) {
+              toast('Terjadi kendala jaringan, silakan coba lagi');
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalBtnText;
+            }
+          });
+        }
       })();
   </script>
 </body>
